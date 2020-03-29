@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+
+<head>
+  <title>Google Map with Geoserver WMS Overlay</title>
+  <meta name="viewport" content="initial-scale=1.0">
+  <meta charset="utf-8">
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzLf_rx6fMgUPbOOHW4IRhdLDwiBB-UVc&callback=initMap"
+    async defer></script>
+
+  <style>
+    /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+    #map {
+      height: 100%;
+    }
+
+    /* Optional: Makes the sample page fill the window. */
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script>
+    var map;
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 7,
+        center: new google.maps.LatLng(5.6549934, -0.1842592),
+        mapTypeId: google.maps.MapTypeId.TERRAIN
+
+      });
+
+      var placesLayer_1 = new google.maps.ImageMapType(
+        {
+          getTileUrl:
+            function (coord, zoom) {
+              var s = Math.pow(2, zoom);
+              var twidth = 256;
+              var theight = 256;
+              var gBl = map.getProjection().fromPointToLatLng(new
+                google.maps.Point(coord.x * twidth / s,
+                  (coord.y + 1) * theight / s));
+              var gTr = map.getProjection().fromPointToLatLng(new
+                google.maps.Point((coord.x + 1) * twidth / s,
+                  coord.y * theight / s));
+              var bbox = gBl.lng() + "," + gBl.lat() + "," + gTr.lng()
+                + "," + gTr.lat();
+              var url = "https://c36df02c.ngrok.io/geoserver/data_gh/wms?service=WMS";
+              url += "&version=1.1.0";
+              url += "&request=GetMap";
+              url += "&layers=data_gh:gha_roads";
+              url += "&bbox=" + bbox;
+              url += "&TRANSPARENT=TRUE";
+              url += "&width=256";
+              url += "&height=256";
+              url += "&srs=EPSG:25000";
+              url += "&format=image/png";
+              return url;
+            },
+          tileSize: new google.maps.Size(256, 256),
+          opacity: 0.85,
+          isPng: true
+        });
+      var placesLayer_2 = new google.maps.ImageMapType(
+        {
+          getTileUrl:
+            function (coord, zoom) {
+              var s = Math.pow(2, zoom);
+              var twidth = 256;
+              var theight = 256;
+              var gBl = map.getProjection().fromPointToLatLng(new
+                google.maps.Point(coord.x * twidth / s,
+                  (coord.y + 1) * theight / s));
+              var gTr = map.getProjection().fromPointToLatLng(new
+                google.maps.Point((coord.x + 1) * twidth / s,
+                  coord.y * theight / s));
+              var bbox = gBl.lng() + "," + gBl.lat() + "," + gTr.lng()
+                + "," + gTr.lat();
+              var url = "https://c36df02c.ngrok.io/geoserver/data_gh/wms?service=WMS";
+              url += "&version=1.1.0";
+              url += "&request=GetMap";
+              url += "&layers=data_gh:ne_50m_rivers_lake_centerlines";
+              url += "&bbox=" + bbox;
+              url += "&TRANSPARENT=TRUE";
+              url += "&width=256";
+              url += "&height=256";
+              url += "&srs=EPSG:404000";
+              url += "&format=image/png";
+              return url;
+            },
+          tileSize: new google.maps.Size(256, 256),
+          opacity: 0.85,
+          isPng: true
+        });
+      var placesLayer_3 = new google.maps.ImageMapType(
+        {
+          getTileUrl:
+            function (coord, zoom) {
+              var s = Math.pow(2, zoom);
+              var twidth = 256;
+              var theight = 256;
+              var gBl = map.getProjection().fromPointToLatLng(new
+                google.maps.Point(coord.x * twidth / s,
+                  (coord.y + 1) * theight / s));
+              var gTr = map.getProjection().fromPointToLatLng(new
+                google.maps.Point((coord.x + 1) * twidth / s,
+                  coord.y * theight / s));
+              var bbox = gBl.lng() + "," + gBl.lat() + "," + gTr.lng()
+                + "," + gTr.lat();
+              var url = "https://c36df02c.ngrok.io/geoserver/data_gh/wms?service=WMS";
+              url += "&version=1.1.0";
+              url += "&request=GetMap";
+              url += "&layers=data_gh:ne_10m_urban_areas";
+              url += "&bbox=" + bbox;
+              url += "&TRANSPARENT=TRUE";
+              url += "&width=256";
+              url += "&height=256";
+              url += "&srs=EPSG:404000";
+              url += "&format=image/png";
+              return url;
+            },
+          tileSize: new google.maps.Size(256, 256),
+          opacity: 0.85,
+          isPng: true
+        });
+
+
+      map.overlayMapTypes.push(placesLayer_1);
+      map.overlayMapTypes.push(placesLayer_2);
+      map.overlayMapTypes.push(placesLayer_3);
+
+
+      var contentString = '<div id="content">' +
+        '<div id="siteNotice">' +
+        '</div>' +
+        '<h1 id="thirdHeading" class="thirdHeading">Location</h1>' +
+        '<div id="bodyContent">' +
+        '<p> This is your current realtime<b> GPS </b>location.</p>' +
+        '</div>' +
+        '</div>';
+
+
+      var infowindow = new google.maps.InfoWindow({
+        content: contentString
+      });
+
+      var myMarker = new google.maps.Marker({
+        map: map,
+      });
+
+      myMarker.addListener('click', function () {
+        infowindow.open(map, myMarker);
+      });
+
+      // Try HTML5 geolocation.
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          var pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+
+          myMarker.setPosition(pos)
+
+        }, function () {
+          handleLocationError(true, infoWindow, map.getCenter());
+        });
+      } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, infoWindow, map.getCenter());
+      }
+
+
+    }
+
+    function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+      infoWindow.setPosition(pos);
+      infoWindow.setContent(browserHasGeolocation ?
+        'Error: The Geolocation service failed.' :
+        'Error: Your browser doesn\'t support geolocation.');
+      infoWindow.open(map);
+
+    }
+
+
+
+  </script>
+</body>
+
+</html>
