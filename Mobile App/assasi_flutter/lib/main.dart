@@ -4,7 +4,7 @@ import 'package:asaasi/screens/WmsScreen.dart';
 
 void main() => runApp(MyApp());
 
-String url = "https://f6a3a908.ngrok.io/geoserver/www/map_online.html";
+String url = "https://3dc8e8e1.ngrok.io/geoserver/www/map_online.html";
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
